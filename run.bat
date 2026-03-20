@@ -11,6 +11,7 @@ if not exist "%VENV_DIR%\Scripts\activate.bat" (
 call "%VENV_DIR%\Scripts\activate.bat"
 
 echo Installing dependencies...
+python -m pip install --quiet torch --index-url https://download.pytorch.org/whl/cu128
 python -m pip install --quiet openai-whisper pyyaml imageio-ffmpeg
 
 echo.

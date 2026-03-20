@@ -45,11 +45,23 @@ def find_pending(source: Path, destination: Path):
     return pending
 
 
+INITIAL_PROMPT = (
+    "Транскрибируй дословно, включая ненормативную лексику без цензуры. "
+    "блять, пиздец, хуй, пизда, ёбаный, сука, мразь, пидор"
+)
+
+
 def transcribe(video: Path, destination: Path, model, language):
     print(f"  Transcribing: {video.name}")
-    result = model.transcribe(str(video), language=language, verbose=False)
+    result = model.transcribe(
+        str(video),
+        language=language,
+        verbose=False,
+        initial_prompt=INITIAL_PROMPT,
+    )
+    lines = [seg["text"].strip() for seg in result["segments"] if seg["text"].strip()]
     out = destination / (video.stem + ".txt")
-    out.write_text(result["text"].strip(), encoding="utf-8")
+    out.write_text("\n".join(lines), encoding="utf-8")
     print(f"  Saved: {out.name}")
 
 
@@ -67,8 +79,10 @@ def main():
         print("Nothing to transcribe — all files already have transcriptions.")
         return
 
-    print(f"Loading Whisper model '{model_name}'...")
-    model = whisper.load_model(model_name)
+    import torch
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Loading Whisper model '{model_name}' on {device.upper()}...")
+    model = whisper.load_model(model_name, device=device)
 
     print(f"\nFound {len(pending)} file(s) to transcribe:\n")
     for video in pending:
