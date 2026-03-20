@@ -50,14 +50,23 @@ INITIAL_PROMPT = (
     "блять, пиздец, хуй, пизда, ёбаный, сука, мразь, пидор"
 )
 
+CSGO_PROMPT = (
+    "Это запись игры в CS:GO. Транскрибируй дословно, включая ненормативную лексику без цензуры. "
+    "блять, пиздец, хуй, пизда, ёбаный, сука, мразь, пидор. "
+    "Игровой сленг: авп, АВП, AWP, петух, раш, смоук, смок, флэш, дроп, кит, пуш, хол, холд, "
+    "пик, пикнуть, ротация, эко, форс, сейв, клатч, эйс, тимкилл, кемпер, ваншот, хедшот, "
+    "Т-сайд, КТ-сайд, бомба, плант, дифьюз, тиммейт, ботан, нуб, про, скилл, рейтинг."
+)
+
 
 def transcribe(video: Path, destination: Path, model, language):
     print(f"  Transcribing: {video.name}")
+    prompt = CSGO_PROMPT if "csgo" in video.stem.lower() else INITIAL_PROMPT
     result = model.transcribe(
         str(video),
         language=language,
         verbose=False,
-        initial_prompt=INITIAL_PROMPT,
+        initial_prompt=prompt,
     )
     lines = [seg["text"].strip() for seg in result["segments"] if seg["text"].strip()]
     out = destination / (video.stem + ".txt")
