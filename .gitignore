@@ -5,3 +5,4 @@ subtitles/*
 venv/
 __pycache__/
 *.py[cod]
+.claude/
