@@ -1,3 +1,7 @@
+# Можно указать относительный или абсолютный путь.
+# Примеры абсолютного пути:
+#   Windows: source: C:/Users/username/Videos
+#   macOS:   source: /Users/username/Movies
 source: raw
 destination: subtitles
 
