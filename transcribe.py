@@ -20,7 +20,7 @@ def _load_audio(file: str, sr: int = _whisper_audio.SAMPLE_RATE) -> np.ndarray:
 
 _whisper_audio.load_audio = _load_audio
 
-VIDEO_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".m4v", ".wmv"}
+VIDEO_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".m4v", ".wmv", ".mpg", ".mpeg"}
 CONFIG_FILE = Path(__file__).parent / "transcribe.yaml"
 
 
@@ -70,6 +70,22 @@ CSGO_PROMPT = (
 )
 
 
+HALLUCINATION_PATTERNS = [
+    "субтитры сделал",
+    "субтитры делал",
+    "субтитры создал",
+    "titulky",
+    "amara.org",
+    "подписывайтесь на канал",
+    "не забудьте подписаться",
+]
+
+
+def is_hallucination(text: str) -> bool:
+    lower = text.lower()
+    return any(p in lower for p in HALLUCINATION_PATTERNS)
+
+
 def transcribe(video: Path, destination: Path, model, language):
     print(f"  Transcribing: {video.name}")
     prompt = CSGO_PROMPT if "csgo" in video.stem.lower() else INITIAL_PROMPT
@@ -82,7 +98,7 @@ def transcribe(video: Path, destination: Path, model, language):
     blocks = []
     for i, seg in enumerate(result["segments"], start=1):
         text = seg["text"].strip()
-        if not text:
+        if not text or is_hallucination(text):
             continue
         start = format_srt_time(seg["start"])
         end = format_srt_time(seg["end"])

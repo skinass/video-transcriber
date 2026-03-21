@@ -11,6 +11,10 @@ A video transcription tool that processes video files and generates subtitle fil
 - `raw/` — input video files to be transcribed
 - `subtitles/` — output `.srt` subtitle files (one block per Whisper segment, with timecodes)
 
+## Supported Video Formats
+
+`.mp4`, `.mkv`, `.avi`, `.mov`, `.webm`, `.flv`, `.m4v`, `.wmv`, `.mpg`, `.mpeg`
+
 ## Running
 
 ```bash
@@ -35,13 +39,17 @@ venv/Scripts/python transcribe.py
 1. Reads `transcribe.yaml` for config
 2. Scans `source/` for video files; skips any that already have a `.srt` in `destination/`
 3. Auto-detects CUDA GPU — loads Whisper model on GPU if available, falls back to CPU
-4. Transcribes all pending files; writes SRT with timecodes to `destination/<stem>.srt`
+4. Transcribes all pending files; filters hallucinations; writes SRT with timecodes to `destination/<stem>.srt`
 
 ## Prompting Logic
 
 Two `initial_prompt` constants in `transcribe.py`:
 - `INITIAL_PROMPT` — default; instructs uncensored transcription
-- `CSGO_PROMPT` — used when `"csgo"` appears in the filename (case-insensitive); extends the default with CS:GO game slang
+- `CSGO_PROMPT` — used when `"csgo"` appears in the filename (case-insensitive); extends the default with CS:GO weapons, grenades, mechanics, and map callouts
+
+## Hallucination Filtering
+
+Whisper sometimes generates spurious subtitle-credit phrases (e.g. "Субтитры сделал DimaTorzok") due to training data contamination. Each segment is checked against `HALLUCINATION_PATTERNS` in `transcribe.py` and silently dropped if matched.
 
 ## Dependencies
 
