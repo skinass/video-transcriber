@@ -9,7 +9,7 @@ A video transcription tool that processes video files and generates subtitle fil
 ## Directory Structure
 
 - `raw/` — input video files to be transcribed
-- `subtitles/` — output `.txt` files (one line per Whisper segment)
+- `subtitles/` — output `.srt` subtitle files (one block per Whisper segment, with timecodes)
 
 ## Running
 
@@ -26,16 +26,16 @@ venv/Scripts/python transcribe.py
 | Key | Default | Description |
 |-----|---------|-------------|
 | `source` | `raw` | Folder with input video files |
-| `destination` | `subtitles` | Folder for output `.txt` files |
+| `destination` | `subtitles` | Folder for output `.srt` files |
 | `model` | `small` | Whisper model: `tiny`, `base`, `small`, `medium`, `large` |
 | `language` | `ru` | Force language (e.g. `"en"`), or `null` for auto-detect |
 
 ## How It Works
 
 1. Reads `transcribe.yaml` for config
-2. Scans `source/` for video files; skips any that already have a `.txt` in `destination/`
+2. Scans `source/` for video files; skips any that already have a `.srt` in `destination/`
 3. Auto-detects CUDA GPU — loads Whisper model on GPU if available, falls back to CPU
-4. Transcribes all pending files; writes one line per segment to `destination/<stem>.txt`
+4. Transcribes all pending files; writes SRT with timecodes to `destination/<stem>.srt`
 
 ## Prompting Logic
 

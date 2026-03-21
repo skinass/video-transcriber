@@ -39,10 +39,18 @@ def find_pending(source: Path, destination: Path):
     pending = []
     for video in sorted(source.iterdir()):
         if video.suffix.lower() in VIDEO_EXTENSIONS:
-            out = destination / (video.stem + ".txt")
+            out = destination / (video.stem + ".srt")
             if not out.exists():
                 pending.append(video)
     return pending
+
+
+def format_srt_time(seconds: float) -> str:
+    ms = int(round(seconds * 1000))
+    h, ms = divmod(ms, 3_600_000)
+    m, ms = divmod(ms, 60_000)
+    s, ms = divmod(ms, 1_000)
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
 INITIAL_PROMPT = (
@@ -71,9 +79,16 @@ def transcribe(video: Path, destination: Path, model, language):
         verbose=False,
         initial_prompt=prompt,
     )
-    lines = [seg["text"].strip() for seg in result["segments"] if seg["text"].strip()]
-    out = destination / (video.stem + ".txt")
-    out.write_text("\n".join(lines), encoding="utf-8")
+    blocks = []
+    for i, seg in enumerate(result["segments"], start=1):
+        text = seg["text"].strip()
+        if not text:
+            continue
+        start = format_srt_time(seg["start"])
+        end = format_srt_time(seg["end"])
+        blocks.append(f"{i}\n{start} --> {end}\n{text}")
+    out = destination / (video.stem + ".srt")
+    out.write_text("\n\n".join(blocks) + "\n", encoding="utf-8")
     print(f"  Saved: {out.name}")
 
 
